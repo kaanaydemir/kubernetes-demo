@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  postgres-db:
+    image: postgres:13.1
+    container_name: postgres-db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: movie
+      POSTGRES_PASSWORD: movie
+      POSTGRES_DB: movie
+    networks:
+      - movie-network
+
+  movie-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: movie-api
+    restart: always
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/movie
+      - SPRING_DATASOURCE_USERNAME=movie
+      - SPRING_DATASOURCE_PASSWORD=movie
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+    depends_on:
+      - postgres-db
+    ports:
+      - "8083:8083"
+    networks:
+      movie-network:
+networks:
+  movie-network:
